@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DemoShop Studio | Everyday Tech, Elevated</title>
+  
+<script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+        window.dataLayer.push(arguments);
+    }
+    gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted'
+    });
+</script>
+<script>
+(function(w,d,s,l,i){
+    w[l]=w[l]||[];
+    w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+    var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+    j.async=true;
+    j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+    f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-KZX9DMXL');
+</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="announcement">A fictional storefront built for e-commerce tracking demonstrations · No real orders or payments</div>
+  <header class="site-header">
+    <div class="nav-wrap">
+      <a class="logo" href="#top" aria-label="DemoShop Studio home"><span class="logo-mark">D.</span> DemoShop <span class="logo-light">Studio</span></a>
+      <nav aria-label="Main navigation"><a href="#products">Shop</a><a href="#about">Our story</a><a href="#join">Join</a><a href="#cart-section">Cart <span class="cart-count" id="cart-count">0</span></a></nav>
+    </div>
+  </header>
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy"><span class="eyebrow">DESIGNED FOR YOUR EVERYDAY</span><h1 id="hero-title">Good tech.<br><em>Better days.</em></h1><p>Thoughtful essentials for the way you work, move, and unwind. Discover your next favorite upgrade.</p><a class="button hero-button" href="#products">Explore collection <span aria-hidden="true">↗</span></a><div class="hero-note">CURATED ESSENTIALS <span>✦</span> CLEAN DESIGN <span>✦</span> DEMO STORE</div></div>
+      <div class="hero-art" aria-hidden="true"><div class="halo"></div><div class="headphone-band"></div><div class="headphone-cup cup-left"></div><div class="headphone-cup cup-right"></div><span class="hero-stamp">NEW<br>DROP</span></div>
+    </section>
+    <section class="features" aria-label="Store highlights"><div><span>✦</span><strong>Curated picks</strong><small>Everyday favorites</small></div><div><span>◇</span><strong>Modern essentials</strong><small>Designed for real life</small></div><div><span>↗</span><strong>Easy checkout</strong><small>Fictional demo orders</small></div></section>
+    <section id="products" class="shop-section"><div class="section-heading"><div><span class="eyebrow">THE COLLECTION</span><h2>Find your new favorite.</h2></div><p>Small upgrades, big difference.</p></div>
+      <div class="products">
+        <article class="product"><div class="product-visual headphones"><span class="product-badge">BESTSELLER</span><div class="mini-headphones" aria-hidden="true"><i></i><b></b><b></b></div></div><div class="product-details"><div class="product-category">AUDIO / EVERYDAY</div><h3>Wireless Headphones</h3><p>Rich sound, comfortable fit, effortless focus.</p><div class="product-bottom"><span class="price">€79.99</span><button onclick="addToCart('headphones', 79.99)">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
+        <article class="product"><div class="product-visual watch"><span class="product-badge">EDITOR'S PICK</span><div class="mini-watch" aria-hidden="true"><i></i><b>10:08</b></div></div><div class="product-details"><div class="product-category">WEARABLES / LIFESTYLE</div><h3>Smart Watch</h3><p>Your day, your goals, right on your wrist.</p><div class="product-bottom"><span class="price">€129.99</span><button onclick="addToCart('smartwatch', 129.99)">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
+      </div>
+    </section>
+    <section class="story" id="about"><span class="eyebrow">OUR POINT OF VIEW</span><h2>Less noise. More of what matters.</h2><p>DemoShop Studio is a fictional shopping experience created to showcase a real-world e-commerce customer journey and Google Tag Manager implementation.</p></section>
+
+    <section class="signup-area" id="join">
+      <div class="section-heading"><div><span class="eyebrow">JOIN THE STUDIO</span><h2>A little something extra.</h2></div></div>
+      <div class="signup-grid">
+        <article class="signup-card"><h3>Newsletter · 10% off</h3><p>Try our fictional welcome offer. No emails are sent.</p>
+          <form id="newsletter-form"><label for="newsletter-email">Demo email alias</label><input id="newsletter-email" type="email" placeholder="demo@example.com" required maxlength="120" autocomplete="off">
+          <label class="checkline"><input id="newsletter-optin" type="checkbox" required> I explicitly agree to this fictional newsletter subscription.</label>
+          <button type="submit">Subscribe & unlock 10%</button></form><p id="newsletter-result" role="status" aria-live="polite"></p></article>
+        <article class="signup-card"><h3>Create a demo account</h3><p>Use made-up details only. No password or real customer information is needed.</p>
+          <form id="account-form"><label for="account-name">Display name</label><input id="account-name" required maxlength="50" placeholder="Demo Customer" autocomplete="off">
+          <label for="account-email">Demo email alias</label><input id="account-email" type="email" required maxlength="120" placeholder="customer@example.com" autocomplete="off">
+          <label for="account-address">Fictional address (optional)</label><input id="account-address" maxlength="100" placeholder="Example Street 1, Demo City" autocomplete="off">
+          <label class="checkline"><input id="account-newsletter" type="checkbox"> I also opt in to the fictional newsletter (optional).</label>
+          <button type="submit">Create demo account</button></form><p id="account-result" role="status" aria-live="polite"></p></article>
+      </div>
+      <article class="signup-card account-status"><h3>My demo account</h3><div id="account-status" aria-live="polite">No demo account created.</div><button type="button" id="logout-demo">Clear demo account</button></article>
+    </section>
+    <section class="cart-section" id="cart-section"><div class="section-heading"><div><span class="eyebrow">YOUR SELECTION</span><h2>Your shopping bag.</h2></div></div><div class="cart-layout"><div id="cart" aria-live="polite"><p>Your cart is empty.</p></div><aside class="cart-summary"><span class="eyebrow">ORDER SUMMARY</span><div class="total-row"><strong>Subtotal</strong><strong>€<span id="cart-total">0.00</span></strong></div><div class="discount-entry"><label for="discount-code">Discount code</label><div class="discount-line"><input id="discount-code" placeholder="WELCOME10" autocomplete="off"><button type="button" id="apply-discount">Apply</button></div><p id="discount-status" role="status"></p></div><div class="total-row"><strong>Demo total</strong><strong>€<span id="discounted-total">0.00</span></strong></div><p>Demo checkout only. No real payment will be collected.</p><button id="checkout-btn" onclick="completePurchase()" disabled>Complete demo purchase ↗</button></aside></div>
+      <div id="purchase-message" class="hidden" role="status"></div>
+    </section>
+  </main>
+  <footer><div><strong>DemoShop Studio.</strong><p>Built to demonstrate thoughtful design and e-commerce tracking.</p></div><div class="footer-note">PORTFOLIO DEMO · NOT A REAL STORE</div></footer>
+
+
+
+
+<div id="cookie-banner" class="cookie-banner hidden"
+     role="dialog"
+     aria-label="Privacy preferences"
+     aria-modal="false">
+
+  <div class="cookie-content">
+    <div class="cookie-heading">
+      <span>🍪</span>
+      <h3>Your privacy matters</h3>
+    </div>
+
+    <p>
+      We use essential technologies to operate our shop.
+      With your permission, we also use analytics and
+      marketing technologies to improve your experience.
+      You can change your preferences at any time.
+    </p>
+
+    <div id="cookie-settings" class="cookie-settings hidden">
+
+      <label>
+        <input type="checkbox" checked disabled>
+        Necessary (always active)
+      </label>
+
+      <label>
+        <input type="checkbox" id="consent-analytics">
+        Analytics
+      </label>
+
+      <label>
+        <input type="checkbox" id="consent-marketing">
+        Marketing
+      </label>
+
+    </div>
+
+    <div class="cookie-actions">
+      <button type="button" id="reject-cookies">
+        Reject optional
+      </button>
+
+      <button type="button" id="customize-cookies">
+        Customize
+      </button>
+
+      <button type="button" id="accept-cookies">
+        Accept all
+      </button>
+
+      <button type="button" id="save-cookies" class="hidden">
+        Save preferences
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<button type="button" id="privacy-settings"
+        class="privacy-settings">
+  Cookie settings
+</button>
+
+
+<section id="demo-controls" class="demo-controls hidden"
+         aria-label="Presentation controls">
+
+  <h3>Presentation Mode</h3>
+  <p>Reset your fictional customer journey.</p>
+
+  <label>
+    <input type="checkbox" id="reset-consent" checked>
+    Cookie preferences
+  </label>
+
+  <label>
+    <input type="checkbox" id="reset-cart" checked>
+    Shopping cart and discount
+  </label>
+
+  <label>
+    <input type="checkbox" id="reset-accounts" checked>
+    Demo accounts and newsletter
+  </label>
+
+  <label>
+    <input type="checkbox" id="reset-orders" checked>
+    Demo order history
+  </label>
+
+  <button type="button" id="reset-demo">
+    Reset selected demo data
+  </button>
+
+  <button type="button" id="close-demo-controls">
+    Close
+  </button>
+</section>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script>const cartCounter=document.getElementById('cart-count');const originalUpdateCart=updateCart;updateCart=function(){originalUpdateCart();cartCounter.textContent=cart.length;};</script>
+</body>
+</html>
