@@ -1,86 +1,158 @@
-# DemoShop Studio — E-Commerce Analytics Demo
+# DemoShop Studio — E-Commerce Tracking Demo
 
-A fictional e-commerce application built to demonstrate event-based tracking, conversion measurement, and marketing analytics using Google Tag Manager (GTM) and Google Analytics 4 (GA4).
+A fictional e-commerce website built to demonstrate practical Google Tag Manager (GTM) and Google Analytics 4 (GA4) implementation.
 
-## Project Overview
+This project combines a Python/Flask web application with event-based analytics tracking, a simulated checkout process, and an interactive shopping experience.
 
-DemoShop Studio simulates a customer journey through an online store, from browsing products and adding items to a shopping cart to completing a purchase.
+**Project purpose:** Demonstrate how user interactions can be translated into structured analytics events, tested, and used to understand the e-commerce customer journey.
 
-The project also includes fictional account registration, newsletter subscriptions, promotional discounts, and cookie consent preferences.
-
-Its main purpose is to demonstrate how technical tracking implementations can support marketing analysis and conversion optimization.
-
-## Technologies
-
-- Python and Flask
-- HTML, CSS, and JavaScript
-- Google Tag Manager (GTM)
-- Google Analytics 4 (GA4)
-- JavaScript dataLayer
-- Browser localStorage for fictional demo data
-
-## Tracking Events
-
-| Event | Description |
-|---|---|
-| `add_to_cart` | A product is added to the shopping cart |
-| `begin_checkout` | The simulated checkout process begins |
-| `purchase` | A fictional purchase is completed |
-| `sign_up` | A fictional customer account is created |
-| `newsletter_signup` | A visitor explicitly subscribes to the fictional newsletter |
-| `generate_lead` | A newsletter form generates a fictional lead |
-
-E-commerce events include relevant information such as product identifiers, prices, currency, and transaction details.
+> **Disclaimer:** DemoShop Studio is a portfolio project, not a real online store. No real purchases or payments are processed.
 
 ## Features
 
+- Responsive storefront with fictional products
 - Interactive shopping cart
-- Simulated checkout and purchases
-- Fictional customer registration
-- Newsletter opt-in
-- Promotional discount code (`WELCOME10`)
-- Cookie consent preferences
-- GTM event tracking
-- GA4 integration
+- Discount code functionality
+- Multi-step demo checkout
+- Shipping and payment method selection
+- Simulated purchase confirmation with transaction ID
+- Newsletter and demo account interactions
+- Cookie settings interface
+- Event-based e-commerce tracking
 
-## Run Locally
+## Technologies
 
-1. Install Python.
-2. Clone or download this repository.
-3. Install Flask:
+| Technology | Purpose |
+|---|---|
+| Python | Application backend |
+| Flask | Local web server and template rendering |
+| HTML | Website structure |
+| CSS | Responsive design and styling |
+| JavaScript | Interactive functionality and data layer events |
+| Google Tag Manager | Tag and trigger management |
+| Google Analytics 4 | Event-based analytics |
+| Git & GitHub | Version control and project documentation |
 
-   ```bash
-   pip install flask
-   ```
+## Analytics Implementation
 
-4. Start the application:
+The website uses JavaScript `dataLayer.push()` calls to communicate user interactions to Google Tag Manager.
 
-   ```bash
-   python app.py
-   ```
+GTM processes these events through custom event triggers and GA4 event tags.
 
-5. Open `http://127.0.0.1:5000` in your browser.
+### E-Commerce Events
 
-## Marketing Analytics Use Cases
+| Event | Description |
+|---|---|
+| `view_item_list` | Product collection displayed |
+| `select_item` | Product selected |
+| `add_to_cart` | Product added to shopping cart |
+| `remove_from_cart` | Product removed from shopping cart |
+| `view_cart` | Shopping cart viewed |
+| `begin_checkout` | Checkout process started |
+| `add_shipping_info` | Shipping method selected |
+| `add_payment_info` | Demo payment method selected |
+| `purchase` | Simulated order completed |
 
-The tracking implementation supports analysis of:
+### Additional Events
 
-- Product engagement and shopping cart activity
-- Checkout progression and completed purchases
-- Account registrations
-- Newsletter conversions
-- Promotional campaign engagement
+- `newsletter_signup` — Newsletter signup
+- `sign_up` — Demo account registration
 
-These events provide a foundation for building GA4 reports, conversion analyses, and purchase funnels once sufficient data has been collected.
+### E-Commerce Data
 
-## Important Notes
+Depending on the event, the data layer includes information such as:
 
-This is a fictional demonstration project.
+- Product ID and name
+- Product category
+- Product price and quantity
+- Currency (`EUR`)
+- Transaction value
+- Transaction ID
 
-No real purchases, payment transactions, or customer accounts are processed. Demo information is stored locally in the browser.
+These values help demonstrate how structured data can support e-commerce analytics.
 
-Google Analytics reporting requires a separately configured GA4 property and GTM container.
+## Tracking Architecture
 
-## Project Purpose
+**User interaction → JavaScript data layer → Google Tag Manager → Google Analytics 4**
 
-Created as a practical portfolio project to demonstrate technical implementation skills, analytical thinking, and an understanding of digital marketing measurement.
+1. A visitor interacts with the website.
+2. JavaScript pushes an event and relevant data to the data layer.
+3. Google Tag Manager detects the event through a matching trigger.
+4. A GA4 event tag sends the information to Google Analytics.
+5. Events can be inspected using GTM Preview and GA4 debugging tools.
+
+## Testing and Validation
+
+The tracking implementation has been tested using:
+
+- **Google Tag Manager Preview / Tag Assistant** — To inspect data layer events and verify tag execution.
+- **GA4 DebugView** — To inspect incoming analytics events.
+- **Chrome Developer Tools** — To inspect analytics network requests and event parameters.
+
+The checkout flow and multiple e-commerce events have been tested locally.
+
+**Note:** The GitHub repository contains the website source code. The GTM container and GA4 property are managed separately in Google's platforms.
+
+## Running the Project Locally
+
+### Requirements
+
+- Python 3
+- Flask
+
+### Setup
+
+Clone the repository:
+
+```bash
+git clone https://github.com/VE-S/KlickPiloten-ECommerce.git
+cd KlickPiloten-ECommerce
+```
+
+Install Flask:
+
+```bash
+python -m pip install flask
+```
+
+Start the application:
+
+```bash
+python app.py
+```
+
+Open the following address in your browser:
+
+`http://127.0.0.1:5000`
+
+The application runs locally and is not automatically hosted by GitHub.
+
+## Project Structure
+
+```text
+KlickPiloten-ECommerce/
+├── app.py
+├── templates/
+│   └── index.html
+├── static/
+│   ├── script.js
+│   └── style.css
+├── .gitignore
+└── README.md
+```
+
+## Learning Objectives
+
+This project demonstrates practical experience with:
+
+- Implementing event-based web tracking
+- Working with the Google Tag Manager data layer
+- Configuring GA4 events and triggers
+- Tracking the e-commerce customer journey
+- Debugging analytics implementations
+- Combining frontend development with marketing analytics
+- Using Git and GitHub for version control
+
+## Author
+
+Created as a personal portfolio project to demonstrate web development, marketing analytics, and practical tracking implementation.
