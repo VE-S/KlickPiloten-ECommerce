@@ -1,5 +1,6 @@
 let cart = [];
 const DEMO_ACCOUNT_KEY = "demoshop_demo_account";
+const DEMO_REGISTERED_ACCOUNT_KEY = "demoshop_registered_account";
 const DEMO_NEWSLETTER_KEY = "demoshop_newsletter";
 const DEMO_ORDERS_KEY = "demoshop_order_history";
 const DEMO_DISCOUNT_KEY = "demoshop_discount";
@@ -152,6 +153,11 @@ function completePurchase() {
         payment_type: paymentType,
         items
     });
+    // Fictional local demo data only; never read customer form values.
+    const includeDemoUserData = ["localhost", "127.0.0.1"].includes(window.location.hostname)
+        && readConsent()?.marketing === true;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({user_data: includeDemoUserData ? {email: "demo@example.com"} : null});
     pushEcommerce("purchase", {
         transaction_id: transactionId,
         value: total,
@@ -161,6 +167,8 @@ function completePurchase() {
         shipping_tier: shippingTier,
         items
     });
+
+    window.dataLayer.push({user_data: null});
 
     const message = document.getElementById("purchase-message");
     message.replaceChildren();
@@ -387,6 +395,7 @@ document.getElementById("reset-demo")
 
         if (resetAccounts) {
             localStorage.removeItem("demoshop_demo_account");
+            localStorage.removeItem(DEMO_REGISTERED_ACCOUNT_KEY);
             localStorage.removeItem(DEMO_DISCOUNT_KEY);
             localStorage.removeItem("demoshop_newsletter");
         }
@@ -425,7 +434,9 @@ document.getElementById("account-form").addEventListener("submit", event => {
     const address = document.getElementById("account-address").value.trim();
     const newsletter = document.getElementById("account-newsletter").checked;
     if (!name || !email) return;
-    localStorage.setItem(DEMO_ACCOUNT_KEY, JSON.stringify({name, newsletter, has_demo_address: Boolean(address)}));
+    const demoAccount = {name, newsletter, has_demo_address: Boolean(address)};
+    localStorage.setItem(DEMO_REGISTERED_ACCOUNT_KEY, JSON.stringify(demoAccount));
+    localStorage.setItem(DEMO_ACCOUNT_KEY, JSON.stringify(demoAccount));
     if (newsletter) {
         localStorage.setItem(DEMO_NEWSLETTER_KEY, JSON.stringify({subscribed: true}));
         localStorage.setItem(DEMO_DISCOUNT_KEY, DEMO_CODE);
@@ -435,12 +446,40 @@ document.getElementById("account-form").addEventListener("submit", event => {
     document.getElementById("account-result").textContent = newsletter ? "Demo account created. WELCOME10 unlocked!" : "Demo account created!";
     document.getElementById("account-form").reset();
     refreshAccount();
+    updateDemoLoginButtons();
     updateCart();
 });
 
-document.getElementById("logout-demo").addEventListener("click", () => {
+// Demo-only login: this is a local profile switch, NOT real authentication.
+// Keep the registered fictional profile when logging out so a subsequent login
+// is distinguishable from sign_up and emits GA4's recommended `login` event.
+const logoutDemoButton = document.getElementById("logout-demo");
+const loginDemoButton = document.createElement("button");
+loginDemoButton.type = "button";
+loginDemoButton.id = "login-demo";
+loginDemoButton.textContent = "Log in (demo)";
+logoutDemoButton.insertAdjacentElement("afterend", loginDemoButton);
+
+function updateDemoLoginButtons() {
+    const signedIn = Boolean(demoRead(DEMO_ACCOUNT_KEY));
+    const registered = Boolean(demoRead(DEMO_REGISTERED_ACCOUNT_KEY));
+    loginDemoButton.hidden = signedIn || !registered;
+    logoutDemoButton.hidden = !signedIn;
+}
+
+logoutDemoButton.addEventListener("click", () => {
     localStorage.removeItem(DEMO_ACCOUNT_KEY);
     refreshAccount();
+    updateDemoLoginButtons();
+});
+
+loginDemoButton.addEventListener("click", () => {
+    const account = demoRead(DEMO_REGISTERED_ACCOUNT_KEY);
+    if (!account || demoRead(DEMO_ACCOUNT_KEY)) return;
+    localStorage.setItem(DEMO_ACCOUNT_KEY, JSON.stringify(account));
+    demoEmit("login", {method: "demo_account"});
+    refreshAccount();
+    updateDemoLoginButtons();
 });
 
 document.getElementById("apply-discount").addEventListener("click", () => {
@@ -456,4 +495,5 @@ document.getElementById("apply-discount").addEventListener("click", () => {
     updateCart();
 });
 refreshAccount();
+updateDemoLoginButtons();
 updateCart();
