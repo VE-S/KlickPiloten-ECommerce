@@ -11,126 +11,156 @@ const cartSubtotal = () => cart.reduce((sum, product) => sum + product.price, 0)
 const cartPayable = () => Math.round(cartSubtotal() * (discountActive() ? 0.9 : 1) * 100) / 100;
 
 
-function addToCart(productId, price) {
-
-    const product = {
-        id: productId,
-        price: price
-    };
-
-    cart.push(product);
-
-    const productName = productId === "headphones" ? "Wireless Headphones" : productId === "smartwatch" ? "Smart Watch" : productId;
+const PRODUCTS = {
+    headphones: {name: "Wireless Headphones", price: 79.99, category: "Audio"},
+    smartwatch: {name: "Smart Watch", price: 129.99, category: "Wearables"}
+};
+const LIST = {item_list_id: "main_collection", item_list_name: "Main Collection"};
+const ga4Item = (id, quantity = 1, index) => {
+    const p = PRODUCTS[id];
+    const item = {item_id: id, item_name: p.name, item_category: p.category, price: p.price, quantity};
+    if (index !== undefined) item.index = index;
+    return item;
+};
+const pushEcommerce = (event, ecommerce) => {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({ecommerce: null});
-    demoEmit("add_to_cart", {
-        ecommerce: {
-            currency: "EUR",
-            value: price,
-            items: [{item_id: productId, item_name: productName, price: price, quantity: 1}]
-        }
+    demoEmit(event, {ecommerce});
+};
+const cartItems = () => {
+    const map = new Map();
+    cart.forEach(p => map.set(p.id, (map.get(p.id) || 0) + 1));
+    return Array.from(map, ([id, qty], i) => ga4Item(id, qty, i));
+};
+
+let checkoutStep = 0; // 0 = none, 1 = begin_checkout, 2 = shipping done
+let viewedCartSignature = "";
+
+function resetCheckout() {
+    checkoutStep = 0;
+    document.getElementById("checkout-section").classList.add("hidden");
+    document.getElementById("payment-step").classList.add("hidden");
+    document.getElementById("shipping-step").classList.remove("hidden");
+}
+
+function addToCart(productId) {
+    const p = PRODUCTS[productId];
+    if (!p) return;
+    cart.push({id: productId, price: p.price});
+    resetCheckout();
+    pushEcommerce("add_to_cart", {
+        currency: "EUR",
+        value: p.price,
+        items: [{...ga4Item(productId), ...LIST}]
     });
-
     document.getElementById("purchase-message").classList.add("hidden");
-
-    console.log("Product added:", product);
-
     updateCart();
 }
 
-function removeFromCart(index) {
-
-    const removedProduct = cart.splice(index, 1)[0];
-
-    console.log("Product removed:", removedProduct);
-
+function removeFromCart(productId) {
+    const index = cart.findIndex(p => p.id === productId);
+    if (index === -1) return;
+    const [removed] = cart.splice(index, 1);
+    resetCheckout();
+    pushEcommerce("remove_from_cart", {
+        currency: "EUR",
+        value: removed.price,
+        items: [ga4Item(productId)]
+    });
     updateCart();
 }
 
 function updateCart() {
-
     const cartElement = document.getElementById("cart");
-    const totalElement = document.getElementById("cart-total");
     const checkoutButton = document.getElementById("checkout-btn");
-
     cartElement.innerHTML = "";
 
     if (cart.length === 0) {
         cartElement.textContent = "Your cart is empty.";
+        resetCheckout();
     } else {
-
         const list = document.createElement("ul");
-
-        cart.forEach((product, index) => {
-
+        cartItems().forEach(line => {
             const item = document.createElement("li");
-
-            const productText = document.createElement("span");
-            productText.textContent =
-                `${product.id} - €${product.price.toFixed(2)} `;
-
+            const text = document.createElement("span");
+            text.textContent = `${line.item_name} × ${line.quantity} - €${(line.price * line.quantity).toFixed(2)} `;
             const removeButton = document.createElement("button");
-            removeButton.textContent = "Remove";
-
-            removeButton.onclick = function() {
-                removeFromCart(index);
-            };
-
-            item.appendChild(productText);
-            item.appendChild(removeButton);
+            removeButton.textContent = "Remove one";
+            removeButton.onclick = () => removeFromCart(line.item_id);
+            item.append(text, removeButton);
             list.appendChild(item);
         });
-
         cartElement.appendChild(list);
     }
 
-    const total = cart.reduce(
-        (sum, product) => sum + product.price, 0
-    );
-
-    totalElement.textContent = total.toFixed(2);
+    document.getElementById("cart-total").textContent = cartSubtotal().toFixed(2);
     document.getElementById("discounted-total").textContent = cartPayable().toFixed(2);
     document.getElementById("discount-status").textContent = discountActive() ? "WELCOME10 applied · 10% off" : "";
-
+    const counter = document.getElementById("cart-count");
+    if (counter) counter.textContent = cart.length;
     checkoutButton.disabled = cart.length === 0;
 }
 
-function completePurchase() {
+function beginCheckout() {
     if (cart.length === 0) return;
+    checkoutStep = 1;
+    document.getElementById("checkout-section").classList.remove("hidden");
+    pushEcommerce("begin_checkout", {
+        currency: "EUR",
+        value: cartPayable(),
+        coupon: discountActive() ? DEMO_CODE : undefined,
+        items: cartItems()
+    });
+}
 
-    const checkoutButton = document.getElementById("checkout-btn");
-    checkoutButton.disabled = true;
+function submitShipping() {
+    if (checkoutStep !== 1) return;
+    checkoutStep = 2;
+    const tier = document.getElementById("shipping-tier").value;
+    pushEcommerce("add_shipping_info", {
+        currency: "EUR",
+        value: cartPayable(),
+        coupon: discountActive() ? DEMO_CODE : undefined,
+        shipping_tier: tier,
+        items: cartItems()
+    });
+    document.getElementById("shipping-step").classList.add("hidden");
+    document.getElementById("payment-step").classList.remove("hidden");
+}
+
+function completePurchase() {
+    if (cart.length === 0 || checkoutStep !== 2) return;
+
+    const placeBtn = document.getElementById("place-order-btn");
+    placeBtn.disabled = true;
     const subtotal = Math.round(cartSubtotal() * 100) / 100;
     const hasDiscount = discountActive();
     const total = cartPayable();
     const transactionId = "DEMO-" + crypto.randomUUID();
-    const quantities = new Map();
-
-    for (const product of cart) {
-        const current = quantities.get(product.id) || {item_id: product.id, item_name: product.id === "headphones" ? "Wireless Headphones" : product.id === "smartwatch" ? "Smart Watch" : product.id, price: product.price, quantity: 0};
-        current.quantity += 1;
-        quantities.set(product.id, current);
-    }
-
-    const items = Array.from(quantities.values());
-    const ecommerce = {
-        transaction_id: transactionId,
-        value: total,
-        currency: "EUR",
-        coupon: hasDiscount ? DEMO_CODE : undefined,
-        discount: Math.round((subtotal - total) * 100) / 100,
-        items
-    };
+    const items = cartItems();
+    const shippingTier = document.getElementById("shipping-tier").value;
+    const paymentType = document.getElementById("payment-type").value;
 
     const history = demoRead(DEMO_ORDERS_KEY) || [];
     history.push({transaction_id: transactionId, value: total, currency: "EUR", item_count: cart.length});
     localStorage.setItem(DEMO_ORDERS_KEY, JSON.stringify(history));
 
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({ecommerce: null});
-    demoEmit("begin_checkout", {ecommerce: {currency: "EUR", value: total, items}});
-    window.dataLayer.push({ecommerce: null});
-    demoEmit("purchase", {ecommerce});
+    pushEcommerce("add_payment_info", {
+        currency: "EUR",
+        value: total,
+        coupon: hasDiscount ? DEMO_CODE : undefined,
+        payment_type: paymentType,
+        items
+    });
+    pushEcommerce("purchase", {
+        transaction_id: transactionId,
+        value: total,
+        currency: "EUR",
+        coupon: hasDiscount ? DEMO_CODE : undefined,
+        discount: Math.round((subtotal - total) * 100) / 100,
+        shipping_tier: shippingTier,
+        items
+    });
 
     const message = document.getElementById("purchase-message");
     message.replaceChildren();
@@ -145,8 +175,47 @@ function completePurchase() {
 
     cart = [];
     localStorage.removeItem(DEMO_DISCOUNT_KEY);
+    placeBtn.disabled = false;
     updateCart();
 }
+
+// ---- Product list / item / cart views ----
+function observeOnce(el, threshold, callback) {
+    if (!el || !("IntersectionObserver" in window)) return;
+    new IntersectionObserver((entries, obs) => {
+        if (entries.some(e => e.isIntersecting)) callback(obs);
+    }, {threshold}).observe(el);
+}
+
+observeOnce(document.getElementById("products"), 0.3, obs => {
+    obs.disconnect();
+    pushEcommerce("view_item_list", {
+        ...LIST,
+        items: Object.keys(PRODUCTS).map((id, i) => ({...ga4Item(id, 1, i), ...LIST}))
+    });
+});
+
+document.querySelectorAll(".product[data-product-id]").forEach(el => {
+    el.addEventListener("click", event => {
+        if (event.target.closest("button")) return;
+        const id = el.dataset.productId;
+        pushEcommerce("select_item", {...LIST, items: [{...ga4Item(id), ...LIST}]});
+    });
+});
+
+if ("IntersectionObserver" in window) {
+    new IntersectionObserver(entries => {
+        if (!entries.some(e => e.isIntersecting) || cart.length === 0) return;
+        const signature = cart.map(p => p.id).sort().join(",");
+        if (signature === viewedCartSignature) return;
+        viewedCartSignature = signature;
+        pushEcommerce("view_cart", {currency: "EUR", value: cartPayable(), items: cartItems()});
+    }, {threshold: 0.3}).observe(document.getElementById("cart-section"));
+}
+
+document.getElementById("checkout-btn").addEventListener("click", beginCheckout);
+document.getElementById("to-payment").addEventListener("click", submitShipping);
+document.getElementById("place-order-btn").addEventListener("click", completePurchase);
 
 
 
@@ -189,6 +258,9 @@ function saveConsent(analytics, marketing) {
     );
 
     cookieBanner.classList.add("hidden");
+    cookieSettings.classList.add("hidden");
+    document.getElementById("save-cookies").classList.add("hidden");
+    document.getElementById("customize-cookies").classList.remove("hidden");
 }
 
 function openCookieSettings() {
@@ -202,6 +274,8 @@ function openCookieSettings() {
 
     document.getElementById("save-cookies")
         .classList.remove("hidden");
+    document.getElementById("customize-cookies")
+        .classList.add("hidden");
 }
 
 function readConsent() {
@@ -226,12 +300,7 @@ function readConsent() {
 
 const storedConsent = readConsent();
 
-if (storedConsent) {
-    updateConsent(
-        storedConsent.analytics,
-        storedConsent.marketing
-    );
-} else {
+if (!storedConsent) {
     cookieBanner.classList.remove("hidden");
 }
 
@@ -265,7 +334,8 @@ const demoControls =
     document.getElementById("demo-controls");
 
 const isLocalDemo = ["localhost", "127.0.0.1"]
-    .includes(window.location.hostname);
+    .includes(window.location.hostname)
+    || new URLSearchParams(window.location.search).has("demo");
 
 document.addEventListener("keydown", (event) => {
     if (

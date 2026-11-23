@@ -21,6 +21,19 @@
     });
 </script>
 <script>
+    try {
+        var c = JSON.parse(localStorage.getItem("demoshop_consent_v1"));
+        if (c && typeof c.analytics === "boolean" && typeof c.marketing === "boolean") {
+            gtag("consent", "update", {
+                analytics_storage: c.analytics ? "granted" : "denied",
+                ad_storage: c.marketing ? "granted" : "denied",
+                ad_user_data: c.marketing ? "granted" : "denied",
+                ad_personalization: c.marketing ? "granted" : "denied"
+            });
+        }
+    } catch (e) {}
+</script>
+<script>
 (function(w,d,s,l,i){
     w[l]=w[l]||[];
     w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
@@ -33,6 +46,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KZX9DMXL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="announcement">A fictional storefront built for e-commerce tracking demonstrations · No real orders or payments</div>
   <header class="site-header">
     <div class="nav-wrap">
@@ -48,8 +62,8 @@
     <section class="features" aria-label="Store highlights"><div><span>✦</span><strong>Curated picks</strong><small>Everyday favorites</small></div><div><span>◇</span><strong>Modern essentials</strong><small>Designed for real life</small></div><div><span>↗</span><strong>Easy checkout</strong><small>Fictional demo orders</small></div></section>
     <section id="products" class="shop-section"><div class="section-heading"><div><span class="eyebrow">THE COLLECTION</span><h2>Find your new favorite.</h2></div><p>Small upgrades, big difference.</p></div>
       <div class="products">
-        <article class="product"><div class="product-visual headphones"><span class="product-badge">BESTSELLER</span><div class="mini-headphones" aria-hidden="true"><i></i><b></b><b></b></div></div><div class="product-details"><div class="product-category">AUDIO / EVERYDAY</div><h3>Wireless Headphones</h3><p>Rich sound, comfortable fit, effortless focus.</p><div class="product-bottom"><span class="price">€79.99</span><button onclick="addToCart('headphones', 79.99)">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
-        <article class="product"><div class="product-visual watch"><span class="product-badge">EDITOR'S PICK</span><div class="mini-watch" aria-hidden="true"><i></i><b>10:08</b></div></div><div class="product-details"><div class="product-category">WEARABLES / LIFESTYLE</div><h3>Smart Watch</h3><p>Your day, your goals, right on your wrist.</p><div class="product-bottom"><span class="price">€129.99</span><button onclick="addToCart('smartwatch', 129.99)">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
+        <article class="product" data-product-id="headphones"><div class="product-visual headphones"><span class="product-badge">BESTSELLER</span><div class="mini-headphones" aria-hidden="true"><i></i><b></b><b></b></div></div><div class="product-details"><div class="product-category">AUDIO / EVERYDAY</div><h3>Wireless Headphones</h3><p>Rich sound, comfortable fit, effortless focus.</p><div class="product-bottom"><span class="price">€79.99</span><button onclick="addToCart('headphones')">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
+        <article class="product" data-product-id="smartwatch"><div class="product-visual watch"><span class="product-badge">EDITOR'S PICK</span><div class="mini-watch" aria-hidden="true"><i></i><b>10:08</b></div></div><div class="product-details"><div class="product-category">WEARABLES / LIFESTYLE</div><h3>Smart Watch</h3><p>Your day, your goals, right on your wrist.</p><div class="product-bottom"><span class="price">€129.99</span><button onclick="addToCart('smartwatch')">Add to cart <span aria-hidden="true">+</span></button></div></div></article>
       </div>
     </section>
     <section class="story" id="about"><span class="eyebrow">OUR POINT OF VIEW</span><h2>Less noise. More of what matters.</h2><p>DemoShop Studio is a fictional shopping experience created to showcase a real-world e-commerce customer journey and Google Tag Manager implementation.</p></section>
@@ -70,7 +84,16 @@
       </div>
       <article class="signup-card account-status"><h3>My demo account</h3><div id="account-status" aria-live="polite">No demo account created.</div><button type="button" id="logout-demo">Clear demo account</button></article>
     </section>
-    <section class="cart-section" id="cart-section"><div class="section-heading"><div><span class="eyebrow">YOUR SELECTION</span><h2>Your shopping bag.</h2></div></div><div class="cart-layout"><div id="cart" aria-live="polite"><p>Your cart is empty.</p></div><aside class="cart-summary"><span class="eyebrow">ORDER SUMMARY</span><div class="total-row"><strong>Subtotal</strong><strong>€<span id="cart-total">0.00</span></strong></div><div class="discount-entry"><label for="discount-code">Discount code</label><div class="discount-line"><input id="discount-code" placeholder="WELCOME10" autocomplete="off"><button type="button" id="apply-discount">Apply</button></div><p id="discount-status" role="status"></p></div><div class="total-row"><strong>Demo total</strong><strong>€<span id="discounted-total">0.00</span></strong></div><p>Demo checkout only. No real payment will be collected.</p><button id="checkout-btn" onclick="completePurchase()" disabled>Complete demo purchase ↗</button></aside></div>
+    <section class="cart-section" id="cart-section"><div class="section-heading"><div><span class="eyebrow">YOUR SELECTION</span><h2>Your shopping bag.</h2></div></div><div class="cart-layout"><div id="cart" aria-live="polite"><p>Your cart is empty.</p></div><aside class="cart-summary"><span class="eyebrow">ORDER SUMMARY</span><div class="total-row"><strong>Subtotal</strong><strong>€<span id="cart-total">0.00</span></strong></div><div class="discount-entry"><label for="discount-code">Discount code</label><div class="discount-line"><input id="discount-code" placeholder="WELCOME10" autocomplete="off"><button type="button" id="apply-discount">Apply</button></div><p id="discount-status" role="status"></p></div><div class="total-row"><strong>Demo total</strong><strong>€<span id="discounted-total">0.00</span></strong></div><p>Demo checkout only. No real payment will be collected.</p><button id="checkout-btn" disabled>Proceed to checkout ↗</button></aside></div>
+      <div id="checkout-section" class="hidden">
+        <h3>Demo checkout</h3>
+        <div id="shipping-step"><label for="shipping-tier">Shipping (free in demo)</label>
+          <select id="shipping-tier"><option value="standard">Standard</option><option value="express">Express</option></select>
+          <button type="button" id="to-payment">Continue to payment</button></div>
+        <div id="payment-step" class="hidden"><label for="payment-type">Payment method (fictional)</label>
+          <select id="payment-type"><option value="demo_card">Demo card</option><option value="demo_invoice">Demo invoice</option></select>
+          <button type="button" id="place-order-btn">Complete demo purchase ↗</button></div>
+      </div>
       <div id="purchase-message" class="hidden" role="status"></div>
     </section>
   </main>
@@ -178,6 +201,5 @@
   </button>
 </section>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
-  <script>const cartCounter=document.getElementById('cart-count');const originalUpdateCart=updateCart;updateCart=function(){originalUpdateCart();cartCounter.textContent=cart.length;};</script>
 </body>
 </html>
