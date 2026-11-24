@@ -24,6 +24,13 @@
     try {
         var c = JSON.parse(localStorage.getItem("demoshop_consent_v1"));
         if (c && typeof c.analytics === "boolean" && typeof c.marketing === "boolean") {
+            var account = JSON.parse(localStorage.getItem("demoshop_demo_account"));
+            if (account && !account.user_id) {
+                account.user_id = "DEMO-USER-" + crypto.randomUUID();
+                localStorage.setItem("demoshop_demo_account", JSON.stringify(account));
+                localStorage.setItem("demoshop_registered_account", JSON.stringify(account));
+            }
+            window.dataLayer.push({user_id: c.analytics && account ? account.user_id : null});
             gtag("consent", "update", {
                 analytics_storage: c.analytics ? "granted" : "denied",
                 ad_storage: c.marketing ? "granted" : "denied",
@@ -46,7 +53,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KZX9DMXL" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <noscript>This demo requires JavaScript.</noscript>
   <div class="announcement">A fictional storefront built for e-commerce tracking demonstrations · No real orders or payments</div>
   <header class="site-header">
     <div class="nav-wrap">

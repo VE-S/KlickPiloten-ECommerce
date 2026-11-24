@@ -7,6 +7,17 @@ const DEMO_DISCOUNT_KEY = "demoshop_discount";
 const DEMO_CODE = "WELCOME10";
 const demoRead = key => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
 const demoEmit = (event, fields = {}) => window.dataLayer?.push({event, ...fields});
+// Demo identifiers are random, never derived from form fields.
+function activeDemoUserId() {
+    return readConsent()?.analytics === true ? demoRead(DEMO_ACCOUNT_KEY)?.user_id || null : null;
+}
+function syncDemoUserId() {
+    window.dataLayer.push({user_id: activeDemoUserId()});
+}
+function demoConversionData() {
+    return ["localhost", "127.0.0.1"].includes(location.hostname)
+        && readConsent()?.marketing === true ? {email: "demo@example.com"} : null;
+}
 const discountActive = () => localStorage.getItem(DEMO_DISCOUNT_KEY) === DEMO_CODE;
 const cartSubtotal = () => cart.reduce((sum, product) => sum + product.price, 0);
 const cartPayable = () => Math.round(cartSubtotal() * (discountActive() ? 0.9 : 1) * 100) / 100;
@@ -154,10 +165,8 @@ function completePurchase() {
         items
     });
     // Fictional local demo data only; never read customer form values.
-    const includeDemoUserData = ["localhost", "127.0.0.1"].includes(window.location.hostname)
-        && readConsent()?.marketing === true;
     window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({user_data: includeDemoUserData ? {email: "demo@example.com"} : null});
+    window.dataLayer.push({user_data: demoConversionData()});
     pushEcommerce("purchase", {
         transaction_id: transactionId,
         value: total,
@@ -265,6 +274,9 @@ function saveConsent(analytics, marketing) {
         preferences.marketing
     );
 
+    syncDemoUserId();
+    emitConsentEvents(preferences);
+
     cookieBanner.classList.add("hidden");
     cookieSettings.classList.add("hidden");
     document.getElementById("save-cookies").classList.add("hidden");
@@ -306,7 +318,20 @@ function readConsent() {
     }
 }
 
+// Emit once per granted transition; GTM initialization tags should fire once per page.
+let lastConsentEvents = {analytics: false, marketing: false};
+function emitConsentEvents(preferences) {
+    for (const category of ["analytics", "marketing"]) {
+        if (preferences[category] && !lastConsentEvents[category]) {
+            demoEmit("consent_" + category);
+        }
+        lastConsentEvents[category] = preferences[category];
+    }
+}
+
 const storedConsent = readConsent();
+syncDemoUserId();
+if (storedConsent) emitConsentEvents(storedConsent);
 
 if (!storedConsent) {
     cookieBanner.classList.remove("hidden");
@@ -434,15 +459,18 @@ document.getElementById("account-form").addEventListener("submit", event => {
     const address = document.getElementById("account-address").value.trim();
     const newsletter = document.getElementById("account-newsletter").checked;
     if (!name || !email) return;
-    const demoAccount = {name, newsletter, has_demo_address: Boolean(address)};
+    const demoAccount = {name, newsletter, has_demo_address: Boolean(address), user_id: "DEMO-USER-" + crypto.randomUUID()};
     localStorage.setItem(DEMO_REGISTERED_ACCOUNT_KEY, JSON.stringify(demoAccount));
     localStorage.setItem(DEMO_ACCOUNT_KEY, JSON.stringify(demoAccount));
+    syncDemoUserId();
     if (newsletter) {
         localStorage.setItem(DEMO_NEWSLETTER_KEY, JSON.stringify({subscribed: true}));
         localStorage.setItem(DEMO_DISCOUNT_KEY, DEMO_CODE);
         demoEmit("newsletter_signup", {method: "registration_demo", consent_newsletter: true});
     }
+    window.dataLayer.push({user_data: demoConversionData()});
     demoEmit("sign_up", {method: "demo_account"});
+    window.dataLayer.push({user_data: null});
     document.getElementById("account-result").textContent = newsletter ? "Demo account created. WELCOME10 unlocked!" : "Demo account created!";
     document.getElementById("account-form").reset();
     refreshAccount();
@@ -469,6 +497,8 @@ function updateDemoLoginButtons() {
 
 logoutDemoButton.addEventListener("click", () => {
     localStorage.removeItem(DEMO_ACCOUNT_KEY);
+    syncDemoUserId();
+    demoEmit("demo_logout");
     refreshAccount();
     updateDemoLoginButtons();
 });
@@ -476,7 +506,12 @@ logoutDemoButton.addEventListener("click", () => {
 loginDemoButton.addEventListener("click", () => {
     const account = demoRead(DEMO_REGISTERED_ACCOUNT_KEY);
     if (!account || demoRead(DEMO_ACCOUNT_KEY)) return;
+    if (!account.user_id) {
+        account.user_id = "DEMO-USER-" + crypto.randomUUID();
+        localStorage.setItem(DEMO_REGISTERED_ACCOUNT_KEY, JSON.stringify(account));
+    }
     localStorage.setItem(DEMO_ACCOUNT_KEY, JSON.stringify(account));
+    syncDemoUserId();
     demoEmit("login", {method: "demo_account"});
     refreshAccount();
     updateDemoLoginButtons();
